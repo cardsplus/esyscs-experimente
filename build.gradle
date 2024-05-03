@@ -1,0 +1,88 @@
+// https://docs.gradle.org/
+// https://tomgregory.com/gradle-project-properties-best-practices/
+
+// tag::plugins[]
+plugins {
+    id 'base'
+    id 'eclipse'
+    id 'idea'
+    id 'jacoco'
+    id 'com.palantir.git-version'
+}
+// end::plugins[]
+
+// tag::eclipse[]
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+// end::eclipse[]
+
+// tag::idea[]
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+// end::idea[]
+
+// tag::allprojects[]
+allprojects {
+    description = 'Experimental research with spring boot and svelte'
+    group = 'esy'
+    version = gitVersion()
+    repositories {
+        if (project.hasProperty("defaultMavenRepository")) {
+            maven {
+                url "$defaultMavenRepository"
+            }
+        }
+        mavenCentral()
+     }
+}
+// end::allprojects[]
+
+// tag::subprojects[]
+subprojects {
+    plugins.withType(JavaPlugin) {
+        compileJava.options.encoding = 'UTF-8'
+        java.sourceCompatibility = JavaVersion.VERSION_11
+        java.targetCompatibility = JavaVersion.VERSION_17
+    }
+    tasks.withType(Test) {
+        useJUnitPlatform {
+            excludeEngines 'junit-vintage'
+        }
+        systemProperty "file.encoding", "UTF-8"
+        testLogging {
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
+            showExceptions true
+            showCauses true
+            showStackTraces true
+            showStandardStreams false
+        }
+    }
+}
+// end::subprojects[]
+
+// https://semver.org/ 
+ext.VERSION = new File("${rootDir}/VERSION").text
+task versionCheck() {
+    group = 'versioning'
+    build.dependsOn it
+    doLast {
+        assert new File("${rootDir}/VERSION.md").text
+            .startsWith("# Version " + VERSION)
+    }
+}
+
+ext.LOCALIPV4 = InetAddress.getLocalHost().getHostAddress();
+ext.LOCALHOST = InetAddress.getLocalHost().getHostName();
+task networkCheck() {
+    project.logger.lifecycle('LOCALIPV4=' + LOCALIPV4)
+    project.logger.lifecycle('LOCALHOST=' + LOCALHOST)
+}

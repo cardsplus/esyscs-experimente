@@ -1,0 +1,102 @@
+// tag::spotless[]
+spotless {
+    encoding 'UTF-8'
+    java {
+        target '**/src/**/*.java'
+        target.exclude('**/build/**')
+        indentWithSpaces(4)
+        importOrder('', 'jakarta|javax|java', '\\#')
+        removeUnusedImports()
+        endWithNewline()
+    }
+}
+// end::spotless[]
+
+// tag::jar[]
+jar { // <1>
+    enabled = false
+}
+// end::jar[]
+
+// tag::bootJar[]
+bootJar { // <1>
+    enabled = true
+    manifest {
+        attributes 'Specification-Title': project.name // <2>
+        attributes 'Specification-Version': VERSION
+        attributes 'Implementation-Title': project.name // <3>
+        attributes 'Implementation-Version': project.version
+    }
+    requiresUnpack '**/jruby-complete*.jar', '**/asciidoctorj-*.jar'  // <4>
+}
+// end::bootJar[]
+
+import java.util.Optional;
+ext.DOCKER_IMAGE = Optional.ofNullable(System.getenv("DOCKER_IMAGE"))
+            .orElse(rootProject.name + "/" + project.name)
+ext.DOCKER_TAG = Optional.ofNullable(System.getenv("DOCKER_TAG"))
+            .orElse('latest')
+
+// tag::bootBuildImage[]
+bootBuildImage {
+    mustRunAfter 'build'
+    enabled = true
+    imageName = DOCKER_IMAGE + ":" + DOCKER_TAG
+    tags = [DOCKER_IMAGE + ":" + VERSION]
+    environment = [
+        "BP_JVM_VERSION":"17.*",
+        "BP_SPRING_CLOUD_BINDINGS_DISABLED":"true"
+    ]
+}
+// end::bootBuildImage[]
+
+// tag::jib[]
+jib {
+    from {
+        image = "eclipse-temurin:17-jdk-alpine"
+    }
+    to {    
+        image = DOCKER_IMAGE + ":" + DOCKER_TAG
+        tags = [VERSION]
+    }
+}
+// end::jib[]
+
+// tag::jibDockerBuild[]
+jibDockerBuild {
+    mustRunAfter 'build'
+    enabled = true
+}
+// end::jibDockerBuild[]
+
+// tag::runnerTest[]
+task runnerTest(type: Test) {
+    enabled = true // <1>
+    // https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/testing/TestFilter.html
+    filter { // <2>
+        includeTestsMatching '*RunnerTest'
+        failOnNoMatchingTests false
+    }
+    // https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/TaskOutputs.html
+    outputs.upToDateWhen {false} // <3>
+}
+// end::runnerTest[]
+
+// tag::dockerTest[]
+task dockerTest(type: Test) {
+    enabled = true // <1>
+    mustRunAfter 'bootBuildImage','jibDockerBuild' // <2>
+    // https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/testing/TestFilter.html
+    filter { // <3>
+        includeTestsMatching '*DockerTest'
+        failOnNoMatchingTests false
+    }
+    // https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/TaskOutputs.html
+    outputs.upToDateWhen {false} // <4>
+}
+// end::dockerTest[]
+
+task smoke {
+    mustRunAfter 'clean'
+    dependsOn 'build', 'jibDockerBuild', 'runnerTest', 'dockerTest'
+}

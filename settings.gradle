@@ -1,0 +1,68 @@
+// https://docs.gradle.org/
+// https://docs.gradle.org/current/userguide/plugins.html
+// https://docs.gradle.org/current/userguide/platforms.html
+// https://tomgregory.com/gradle-project-properties-best-practices/
+
+// tag::pluginManagement[]
+pluginManagement {
+    plugins {
+        id 'io.spring.dependency-management' version '1.1.4'
+        id 'org.springframework.boot' version '3.2.5'
+        id 'com.google.cloud.tools.jib' version '3.4.1'
+        id 'com.diffplug.spotless' version '6.25.0'
+        id 'com.palantir.git-version' version '3.0.0'
+        id 'com.github.node-gradle.node' version '7.0.2'
+    }
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+// end::pluginManagement[]
+
+// tag::dependencyResolutionManagement[]
+dependencyResolutionManagement {
+    versionCatalogs {
+        extraLibs {
+            // https://github.com/f4b6a3/tsid-creator
+            library('tsid',
+                'com.github.f4b6a3:tsid-creator:5.2.6')
+            // https://github.com/f4b6a3/ulid-creator
+            library('ulid',
+                'com.github.f4b6a3:ulid-creator:5.2.3')
+            // https://www.eclipse.org/jgit
+            library('jgit', 
+                'org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r')
+            // https://jsoup.org
+            library('jsoup', 
+                'org.jsoup:jsoup:1.16.2')
+            // https://poi.apache.org/
+            library('apache.poi', 
+                'org.apache.poi:poi-ooxml:5.2.5')
+            // https://pdfbox.apache.org/
+            library('apache.pdfbox', 
+                'org.apache.pdfbox:pdfbox:2.0.30')
+            // https://asciidoctor.org/docs/asciidoctorj
+            library('asciidoctorj', 
+                'org.asciidoctor:asciidoctorj:2.5.12')
+            library('asciidoctorj.diagram', 
+                'org.asciidoctor:asciidoctorj-diagram:2.2.17')
+            library('asciidoctorj.pdf', 
+                'org.asciidoctor:asciidoctorj-pdf:2.3.15')
+            // https://www.testcontainers.org
+            library('testcontainers', 
+                'org.testcontainers:junit-jupiter:1.19.7')
+            library('testcontainers.postgresql', 
+                'org.testcontainers:postgresql:1.19.7')
+        }
+        spotlessLibs {
+            // https://github.com/sveltejs/prettier-plugin-svelte
+            version('svelte', "2.9.0")
+        }
+    }
+}
+// end::dependencyResolutionManagement[]
+
+// tag::projectConfiguration[]
+include 'app:backend-oauth2-login'
+// end::projectConfiguration[]

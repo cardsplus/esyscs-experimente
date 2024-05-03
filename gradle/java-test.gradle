@@ -1,0 +1,34 @@
+// tag::clean[]
+clean {
+    delete "${rootDir}/pages/html/" + project.name
+}
+// end::clean[]
+
+// tag::test[]
+test {
+    filter {
+        excludeTestsMatching '*RunnerTest'
+        excludeTestsMatching '*DockerTest'
+        failOnNoMatchingTests false
+    }
+    reports {
+        html.required = true
+        html.destination = file("${rootDir}/pages/html/" + project.name + "/junit5")
+    }
+    jacoco {
+        enabled = true
+    }
+}
+// end::test[]
+
+// tag::jacoco[]
+jacocoTestReport {
+    mustRunAfter test
+    reports {
+        csv.required = false
+        html.required = true
+        html.destination file("${rootDir}/pages/html/" + project.name + "/jacoco")
+        xml.required = true
+    }
+}
+// end::jacoco[]

@@ -1,0 +1,48 @@
+// tag::spotless[]
+spotless {
+    encoding 'UTF-8'
+    java {
+        target '**/src/**/*.java'
+        target.exclude('**/build/**')
+        indentWithSpaces(4)
+        importOrder('', 'jakarta|javax|java', '\\#')
+        removeUnusedImports()
+        endWithNewline()
+    }
+}
+// end::spotless[]
+
+// tag::jar[]
+jar {
+    enabled = true
+    manifest {
+        attributes 'Specification-Title': project.name
+        attributes 'Specification-Version': VERSION
+        attributes 'Implementation-Title': project.name
+        attributes 'Implementation-Version': project.version
+    }
+}
+// end::jar[]
+
+// tag::bootJar[]
+bootJar {
+    enabled = false
+}
+// end::bootJar[]
+
+// tag::bootRun[]
+bootRun {
+    enabled = false
+}
+// end::bootRun[]
+
+// tag::bootBuildImage[]
+bootBuildImage {
+    enabled = false
+}
+// end::bootBuildImage[]
+
+task smoke {
+    mustRunAfter 'clean'
+    dependsOn 'build'
+}

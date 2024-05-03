@@ -1,0 +1,36 @@
+// https://docs.docker.com/engine/reference/commandline/build
+// https://docs.docker.com/engine/reference/commandline/tag
+def dockerBuildImage(String name) {
+    def image1 = rootProject.name + '/' + name;
+    def image2 = rootProject.name + '/' + name + ":" + VERSION;
+    exec {
+        executable 'docker'
+        args 'build', name, '-t', image1
+    }
+    exec {
+        executable 'docker'
+        args 'tag', image1, image2
+    }
+    println 'Built image to docker daemon as ' + image1 + ", " + image2
+}
+ext.dockerBuildImage = this.&dockerBuildImage
+
+// https://docs.docker.com/engine/reference/commandline/save
+// https://github.com/projectatomic/containerd/blob/master/docs/cli.md
+def dockerSaveImage(String name, File dir) {
+    def image = rootProject.name + '/' + name + ':' + VERSION;
+    def file = dir.path + '/' + rootProject.name + '-' + name + '.tar'
+    exec {
+        executable 'docker'
+        args 'save', image, '--output', file
+    }
+    println "Saved image '" + image + "' to '" + file + "'"
+    exec {
+        executable 'k3s'
+        args 'ctr', 'images', 'import', file
+    }
+    println "Saved image '" + image + "' to container deamon"
+    delete file
+}
+ext.dockerSaveImage = this.&dockerSaveImage
+

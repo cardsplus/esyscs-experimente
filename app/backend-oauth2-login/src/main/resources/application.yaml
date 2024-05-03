@@ -1,0 +1,10 @@
+spring:
+  hateoas:
+    use-hal-as-default-json-media-type: false
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: ${OAUTH2_CLIENTID}
+            clientSecret: ${OAUTH2_CLIENTSECRET}

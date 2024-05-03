@@ -1,0 +1,61 @@
+plugins {
+    id 'eclipse'
+    id 'jacoco'
+    id 'java'
+    id 'io.spring.dependency-management'
+    id 'org.springframework.boot'
+    id 'com.google.cloud.tools.jib'
+    id 'com.diffplug.spotless'
+}
+
+dependencies {
+    // https://projectlombok.org
+    compileOnly('org.projectlombok:lombok')
+    annotationProcessor('org.projectlombok:lombok')
+    // https://spring.io/projects/spring-boot
+    implementation('org.springframework.boot:spring-boot-starter')
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-security')
+    implementation('org.springframework.boot:spring-boot-starter-oauth2-client')
+    // https://spring.io/projects/spring-hateoas
+    implementation('org.springframework.hateoas:spring-hateoas')
+}
+dependencies {
+    // https://projectlombok.org
+    testImplementation('org.projectlombok:lombok')
+    // https://spring.io/projects/spring-boot
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    // https://spring.io/projects/spring-security
+    testImplementation('org.springframework.security:spring-security-test')
+    // https://junit.org/junit5
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    // https://site.mockito.org/
+    testImplementation('org.mockito:mockito-junit-jupiter')
+}
+
+springBoot {
+    mainClass = 'esy.EsyBackendOauth2LoginRunner'
+    buildInfo {
+		properties {
+            additional = [
+				'root': rootProject.name
+			]
+		}
+	}
+}
+
+apply from: "${rootDir}/gradle/boot-build.gradle"
+apply from: "${rootDir}/gradle/java-test.gradle"
+apply from: "${rootDir}/gradle/kube-build.gradle"
+
+task dockerBuild {
+    mustRunAfter 'build'
+    dependsOn 'jibDockerBuild'
+}
+
+task dockerSave {
+    mustRunAfter 'dockerBuild'
+    doLast { 
+        dockerSaveImage(project.name, project.buildDir);
+    }
+}

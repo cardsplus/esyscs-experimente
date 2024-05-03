@@ -1,0 +1,21 @@
+.gradle
+.svelte
+.vscode
+build/
+pages/html
+!gradle/wrapper/gradle-wrapper.jar
+
+### Eclipse ###
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+bin/
+
+### IntelliJ ###
+.idea*
+*.iws
+*.iml
+*.ipr
+out/
