@@ -9,10 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -20,11 +18,19 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
-
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class EsyBackendOauth2LoginRestController {
+
+    @GetMapping("/")
+    public ResponseEntity<String> ok() {
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/healthz")
+    public ResponseEntity<String> healthz() {
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/version")
     public Map<String, Object> getVersion() {
@@ -34,13 +40,6 @@ public class EsyBackendOauth2LoginRestController {
         allProperty.put("version", "0.1");
         allProperty.put("oauth2", "github");
         return allProperty;
-    }
-
-    @GetMapping("/login/{provider}")
-    public RedirectView login(@PathVariable String provider) {
-        final var redirectView = new RedirectView();
-        redirectView.setUrl(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + provider);
-        return redirectView;
     }
 
     @GetMapping("/who")
@@ -54,6 +53,11 @@ public class EsyBackendOauth2LoginRestController {
         allProperty.put("allRole", Set.of("VERWALTUNG"));
         allProperty.put("allGroup", Set.of());
         return allProperty;
+    }
+
+    @GetMapping("/home")
+    public ResponseEntity<String> home() {
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/api/enum/kanal")
