@@ -40,8 +40,8 @@ public class EsyBackendOauth2LoginConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((customizer) -> customizer
-                .anyRequest()
-                .authenticated());
+                .requestMatchers("/jwt").permitAll()
+                .anyRequest().authenticated());
         http.oauth2Login((customizer) -> customizer
                 .clientRegistrationRepository(clientRegistrationRepository())
                 .successHandler(successHandler())

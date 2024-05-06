@@ -42,6 +42,11 @@ public class EsyBackendOauth2LoginRestController {
         return allProperty;
     }
 
+    @GetMapping("/jwt")
+    public ResponseEntity<String> jwt() {
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/who")
     public Map<String, Object> who(@AuthenticationPrincipal OAuth2User principal) {
         final var allProperty = new LinkedHashMap<>(principal.getAttributes());
